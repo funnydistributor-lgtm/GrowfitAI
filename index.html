@@ -11,6 +11,15 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
         rel="stylesheet">
+    <!-- GA4 Global Site Tag -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-T9EN2FXVGX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-T9EN2FXVGX');
+    </script>
+
     <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
         integrity="sha384-TiCmbV6A3qR+x/s0oIIf1/uLfxWeeRMvHhwH0k2EONeI5XEJb1u8ZDPwV1c/N7R+"
         crossorigin="anonymous"></script>
@@ -725,7 +734,7 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="logo">GrowFit AI</div>
-            <a href="#app" class="nav-btn">사이즈 지금 확인하기</a>
+            <a href="#app" class="nav-btn" data-cta="navbar">사이즈 지금 확인하기</a>
         </div>
     </nav>
 
@@ -748,12 +757,12 @@
         <div class="container fade-in">
             <h1>아이 옷, 이제<br>한 번에 맞춥니다</h1>
             <p class="subcopy">키와 몸무게, 생년월일만 입력하면 현재는 물론 1년 후 사이즈까지 &mdash;<br>반품 없이, 고민 없이 확인해 보세요.</p>
-            <a href="#app" class="btn">지금 바로 확인하기 &rarr;</a>
+            <a href="#app" class="btn" data-cta="hero_banner">지금 바로 확인하기 &rarr;</a>
         </div>
     </section>
 
     <!-- Section 2: Pain Points -->
-    <section class="container">
+    <section class="container" data-section="pain_points">
         <div class="grid-3">
             <div class="card fade-in">
                 <div class="card-icon">🤷‍♀️</div>
@@ -774,7 +783,7 @@
     </section>
 
     <!-- Section 3: How It Works -->
-    <section class="container">
+    <section class="container" data-section="how_it_works">
         <h2 class="fade-in">간단하게 해결하세요</h2>
         <div class="steps">
             <div class="step-item fade-in">
@@ -802,7 +811,7 @@
     </section>
 
     <!-- Section 4: Features -->
-    <section class="container">
+    <section class="container" data-section="features">
         <h2 class="fade-in">GrowFit AI만의 맞춤 솔루션</h2>
         <div class="grid-2">
             <div class="feature-card fade-in">
@@ -819,7 +828,7 @@
     </section>
 
     <!-- Section 5: Reviews -->
-    <section class="container">
+    <section class="container" data-section="reviews">
         <div class="reviews-section fade-in">
             <h2>이미 많은 부모님들이<br>사이즈 고민을 덜었어요</h2>
             <div class="grid-3">
@@ -852,14 +861,14 @@
     </section>
 
     <!-- Section 6: CTA (Landing End) -->
-    <section class="cta-section container fade-in">
+    <section class="cta-section container fade-in" data-section="cta">
         <h2>30초면 충분합니다</h2>
         <p>오늘 살 옷과 내년 아이 옷 사이즈까지 실패 걱정 없이!</p>
-        <a href="#app" class="btn" style="padding: 20px 48px; font-size: 1.25rem;">무료로 시작하기 &rarr;</a>
+        <a href="#app" class="btn" data-cta="cta_section" style="padding: 20px 48px; font-size: 1.25rem;">무료로 시작하기 &rarr;</a>
     </section>
 
     <!-- Section 7: App Section (The App Itself) -->
-    <section id="app" class="app-section">
+    <section id="app" class="app-section" data-section="app_form">
         <div class="app-container fade-in">
             <div class="app-header">
                 <h2>우리아이 사이즈 분석 👶</h2>
@@ -969,7 +978,7 @@
         <div class="container fade-in">
             <p><strong>GrowFit AI</strong></p>
             <p>데이터 출처: 질병관리청 소아청소년 성장도표 2017</p>
-            <p>이메일 문의: <a href="mailto:hello@growfit.ai" style="text-decoration: underline;">hello@growfit.ai</a></p>
+            <p>이메일 문의: <a href="mailto:hello@growfit.ai" id="contact-email" style="text-decoration: underline;">hello@growfit.ai</a></p>
         </div>
     </footer>
 
@@ -1152,6 +1161,14 @@
             const clothing = document.getElementById('clothing').value;
             const currentMonths = calculateAgeInMonths(birthdate);
 
+            // GA4: start_size_analysis
+            gtag('event', 'start_size_analysis', {
+                child_gender: gender,
+                brand_type: brand,
+                fit_preference: fit,
+                clothing_type: clothing
+            });
+
             const btn = document.querySelector('.submit-btn');
             btn.style.display = 'none';
             document.getElementById('loading-state').style.display = 'block';
@@ -1205,13 +1222,21 @@
 
                 const resultSection = document.getElementById('result-section');
                 resultSection.style.display = 'block';
-                setTimeout(() => { resultSection.classList.add('visible'); }, 50);
+                setTimeout(() => {
+                    resultSection.classList.add('visible');
+                    // GA4: view_size_result
+                    gtag('event', 'view_size_result', {
+                        result_current_size: stripTags(s0)
+                    });
+                }, 50);
 
             }, 1200);
         }
 
         function shareKakao() {
             if (!globalResult.s0) return;
+            // GA4: share
+            gtag('event', 'share', { method: 'Kakao', content_type: 'size_result' });
             const text = `[GrowFit AI] 우리 아이 현재 사이즈 ${globalResult.s0}! 6개월 후 ${globalResult.s6}, 1년 후 ${globalResult.s12} — growfit.ai`;
             if (window.Kakao && Kakao.isInitialized()) {
                 Kakao.Share.sendDefault({ objectType: 'text', text: text, link: { mobileWebUrl: 'https://growfit.ai', webUrl: 'https://growfit.ai' } });
@@ -1220,11 +1245,48 @@
 
         function shareEmail() {
             if (!globalResult.s0) return;
+            // GA4: share
+            gtag('event', 'share', { method: 'Email', content_type: 'size_result' });
             const text = `[GrowFit AI] 우리 아이 현재 사이즈 ${globalResult.s0}! 6개월 후 ${globalResult.s6}, 1년 후 ${globalResult.s12} — growfit.ai`;
             const subject = encodeURIComponent("GrowFit AI 우리아이 사이즈 추천 결과");
             const body = encodeURIComponent(text);
             window.location.href = `mailto:?subject=${subject}&body=${body}`;
         }
+
+        // ===== GA4 Custom Events =====
+        (function() {
+            // 1. click_cta — CTA 버튼 클릭 추적
+            document.querySelectorAll('[data-cta]').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    gtag('event', 'click_cta', {
+                        button_location: el.getAttribute('data-cta')
+                    });
+                });
+            });
+
+            // 2. section_view — 섹션별 스크롤 도달 추적
+            var sectionObserver = new IntersectionObserver(function(entries, obs) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        gtag('event', 'section_view', {
+                            section_name: entry.target.getAttribute('data-section')
+                        });
+                        obs.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.3 });
+            document.querySelectorAll('[data-section]').forEach(function(el) {
+                sectionObserver.observe(el);
+            });
+
+            // 3. click_contact — 하단 문의 메일 클릭
+            var contactLink = document.getElementById('contact-email');
+            if (contactLink) {
+                contactLink.addEventListener('click', function() {
+                    gtag('event', 'click_contact');
+                });
+            }
+        })();
     </script>
 </body>
 
