@@ -20,9 +20,7 @@
         gtag('config', 'G-T9EN2FXVGX');
     </script>
 
-    <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
-        integrity="sha384-TiCmbV6A3qR+x/s0oIIf1/uLfxWeeRMvHhwH0k2EONeI5XEJb1u8ZDPwV1c/N7R+"
-        crossorigin="anonymous"></script>
+
 
     <style>
         :root {
@@ -660,9 +658,9 @@
             opacity: 0.9;
         }
 
-        .btn-kakao {
-            background: #FEE500;
-            color: #3A2929;
+        .btn-share {
+            background: var(--primary);
+            color: #FFFFFF;
         }
 
         .btn-email {
@@ -686,6 +684,26 @@
         footer strong {
             color: var(--text-muted);
             font-size: 1rem;
+        }
+
+        .footer-share-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            padding: 12px 28px;
+            background: var(--text-main);
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .footer-share-btn:hover {
+            opacity: 0.85;
         }
 
         @media (min-width: 768px) {
@@ -966,7 +984,7 @@
                 </div>
 
                 <div class="share-actions">
-                    <button class="share-btn btn-kakao" onclick="shareKakao()">💬 카카오톡 공유</button>
+                    <button class="share-btn btn-share" onclick="shareResult()">📤 공유하기</button>
                     <button class="share-btn btn-email" onclick="shareEmail()">✉️ 이메일 공유</button>
                 </div>
             </div>
@@ -979,6 +997,7 @@
             <p><strong>GrowFit AI</strong></p>
             <p>데이터 출처: 질병관리청 소아청소년 성장도표 2017</p>
             <p>이메일 문의: <a href="mailto:hello@growfit.ai" id="contact-email" style="text-decoration: underline;">hello@growfit.ai</a></p>
+            <button class="footer-share-btn" onclick="sharePage()">📤 이 페이지 공유하기</button>
         </div>
     </footer>
 
@@ -1037,8 +1056,7 @@
         bindBtnGroup('fit-group', 'fit');
         bindBtnGroup('clothing-group', 'clothing');
 
-        // Kakao Init
-        try { if (window.Kakao && !Kakao.isInitialized()) { Kakao.init('c089c8172def97eb00c07210c90c7438'); } } catch (e) { }
+
 
         function getEstimatedHeight(gender, months) {
             const data = gender === 'boy' ? boyData : girlData;
@@ -1233,14 +1251,51 @@
             }, 1200);
         }
 
-        function shareKakao() {
+        var siteUrl = window.location.href.split('#')[0];
+
+        function shareResult() {
             if (!globalResult.s0) return;
             // GA4: share
-            gtag('event', 'share', { method: 'Kakao', content_type: 'size_result' });
-            const text = `[GrowFit AI] 우리 아이 현재 사이즈 ${globalResult.s0}! 6개월 후 ${globalResult.s6}, 1년 후 ${globalResult.s12} — growfit.ai`;
-            if (window.Kakao && Kakao.isInitialized()) {
-                Kakao.Share.sendDefault({ objectType: 'text', text: text, link: { mobileWebUrl: 'https://growfit.ai', webUrl: 'https://growfit.ai' } });
-            } else { alert('카카오톡 공유 기능이 호출되었습니다.\n(텍스트: ' + text + ')'); }
+            gtag('event', 'share', { method: 'native', content_type: 'size_result' });
+
+            var title = 'GrowFit AI 사이즈 결과';
+            var text = '우리 아이 현재 사이즈 ' + globalResult.s0 + ' / 6개월 후 ' + globalResult.s6 + ' / 1년 후 ' + globalResult.s12;
+
+            if (navigator.share) {
+                navigator.share({ title: title, text: text, url: siteUrl }).catch(function() {});
+            } else {
+                copyToClipboard(text + ' \u2014 ' + siteUrl);
+            }
+        }
+
+        function sharePage() {
+            // GA4: share
+            gtag('event', 'share', { method: 'native', content_type: 'landing_page' });
+
+            var title = 'GrowFit AI | 우리아이 맞춤 사이즈 추천';
+            var text = '생년월일과 키·몸무게만 입력하면 현재부터 1년 후 사이즈까지!';
+
+            if (navigator.share) {
+                navigator.share({ title: title, text: text, url: siteUrl }).catch(function() {});
+            } else {
+                copyToClipboard(text + ' ' + siteUrl);
+            }
+        }
+
+        function copyToClipboard(text) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(function() {
+                    alert('링크가 복사되었습니다! 📋');
+                });
+            } else {
+                var ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                alert('링크가 복사되었습니다! 📋');
+            }
         }
 
         function shareEmail() {
